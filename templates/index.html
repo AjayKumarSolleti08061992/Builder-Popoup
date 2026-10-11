@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Café Companion — Smarter Café Experience Powered by Google Cloud & Gemini</title>
+  <meta name="description" content="An intelligent café companion transforming dining, co-working, and barista operations with Google Gemini AI, Cloud SQL, and Cloud Run.">
+  
+  <!-- Modern Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Vanilla CSS Stylesheet -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top App Navigation Bar -->
+  <header class="app-header" id="mainHeader">
+    <div class="header-left">
+      <div class="gcp-badge" id="gcpBadge">
+        <span class="gcp-pill">Google Cloud</span>
+        <span class="challenge-pill">Builder Pop-Up</span>
+      </div>
+      <div class="brand-container">
+        <span class="brand-icon">☕</span>
+        <div>
+          <h1 class="brand-title">The Café Companion</h1>
+          <p class="brand-subtitle">The Artisan Roast &amp; Byte • AI-Powered Space</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-center">
+      <!-- Perspective Switcher: Customer vs Barista -->
+      <nav class="perspective-toggle" aria-label="Perspective Switcher">
+        <button type="button" class="toggle-btn active" id="viewCustomerBtn" onclick="switchView('customer')">
+          <span class="btn-icon">✨</span> Customer Lounge
+        </button>
+        <button type="button" class="toggle-btn" id="viewBaristaBtn" onclick="switchView('barista')">
+          <span class="btn-icon">👨‍🍳</span> Barista Floor
+          <span class="live-dot-indicator"></span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="header-right">
+      <!-- AI Status Pill -->
+      <div class="ai-status-pill" id="aiStatusPill" onclick="openCloudModal()" title="View Google Cloud Architecture">
+        <span class="pulse-gemini-dot" id="geminiPulseDot"></span>
+        <span class="ai-status-label" id="aiStatusLabel">Gemini AI Active</span>
+        <span class="cloud-icon-mini">☁️</span>
+      </div>
+
+      <!-- Cart Button with Counter -->
+      <button type="button" class="cart-trigger-btn" id="cartTriggerBtn" onclick="toggleCartDrawer()" aria-label="Open Cart Drawer">
+        <span class="cart-icon">🛒</span>
+        <span class="cart-label">Order</span>
+        <span class="cart-count-badge" id="cartCountBadge">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- CUSTOMER LOUNGE VIEW -->
+  <!-- ========================================================================= -->
+  <main class="main-content" id="customerView">
+    
+    <!-- Hero Banner with Live Room Metrics -->
+    <section class="hero-banner" id="heroBanner">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="sparkle-icon">✦</span>
+          <span>Google Cloud AI Experiment • Problem Statement #1</span>
+        </div>
+        <h2 class="hero-headline">Design a smarter café experience powered by AI.</h2>
+        <p class="hero-description">
+          Whether you're coding deep into the afternoon, savoring a slow pour-over, or connecting with fellow creators, 
+          Aura harmonizes your ordering, wait times, flavor discovery, and community.
+        </p>
+        
+        <!-- Live Café Telemetry Bar -->
+        <div class="telemetry-bar" id="telemetryBar">
+          <div class="telemetry-card">
+            <span class="telemetry-icon">⏱️</span>
+            <div>
+              <div class="telemetry-value" id="currentWaitTimeDisplay">~4 mins</div>
+              <div class="telemetry-label">Dynamic Wait Time</div>
+            </div>
+          </div>
+          <div class="telemetry-card">
+            <span class="telemetry-icon">🌿</span>
+            <div>
+              <div class="telemetry-value" id="currentVibeDisplay">Cozy &amp; Focused</div>
+              <div class="telemetry-label">Ambient Room Vibe</div>
+            </div>
+          </div>
+          <div class="telemetry-card">
+            <span class="telemetry-icon">🤝</span>
+            <div>
+              <div class="telemetry-value" id="activePatronsDisplay">3 Creators</div>
+              <div class="telemetry-label">Communal Table Open</div>
+            </div>
+          </div>
+          <div class="telemetry-card">
+            <span class="telemetry-icon">⚡</span>
+            <div>
+              <div class="telemetry-value">Gemini 2.5 Flash</div>
+              <div class="telemetry-label">AI Engine</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation Pills for Feature Anchors -->
+    <nav class="feature-anchors-nav" aria-label="Quick Features Navigation">
+      <a href="#orderingSection" class="anchor-link active">💬 Smarter Ordering</a>
+      <a href="#waitsSection" class="anchor-link">⏱️ Better Waits</a>
+      <a href="#discoverySection" class="anchor-link">🌟 Flavor Discovery</a>
+      <a href="#socialSection" class="anchor-link">🤝 Connect People</a>
+      <a href="#feedbackSection" class="anchor-link">📊 Table Pulse</a>
+    </nav>
+
+    <!-- ======================================================================= -->
+    <!-- 1. SMARTER ORDERING: Conversational AI Barista & Menu Grid -->
+    <!-- ======================================================================= -->
+    <section class="app-section" id="orderingSection">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <span class="section-number">01</span>
+          <div>
+            <h3 class="section-title">Smarter Ordering</h3>
+            <p class="section-subtitle">Conversational ordering, dietary customizations &amp; one-tap cart sync</p>
+          </div>
+        </div>
+        <span class="pill-tag">Gemini API Powered</span>
+      </div>
+
+      <div class="ordering-layout">
+        <!-- Conversational Chat Assistant (Aura) -->
+        <div class="chat-assistant-card" id="chatAssistantCard">
+          <div class="chat-card-header">
+            <div class="chat-avatar-wrapper">
+              <span class="avatar-ring"></span>
+              <span class="avatar-emoji">✨</span>
+            </div>
+            <div>
+              <h4 class="chat-barista-name">Aura • AI Café Sommelier</h4>
+              <p class="chat-barista-status">Online • Ask for pairings, dietary options, or orders</p>
+            </div>
+            <button type="button" class="chat-clear-btn" onclick="resetChatHistory()" title="Reset Conversation">↺</button>
+          </div>
+
+          <!-- Quick Suggestion Chips -->
+          <div class="prompt-chips-wrapper" id="promptChips">
+            <button type="button" class="prompt-chip" onclick="sendQuickPrompt('I need a low-acidity iced drink to stay sharp while coding')">
+              ⚡ Focus &amp; Low Acidity
+            </button>
+            <button type="button" class="prompt-chip" onclick="sendQuickPrompt('I am dairy-free and want something sweet with floral notes')">
+              🌸 Dairy-Free &amp; Sweet
+            </button>
+            <button type="button" class="prompt-chip" onclick="sendQuickPrompt('What warm artisanal pastry pairs best with a flat white?')">
+              🥐 Pastry Pairing
+            </button>
+            <button type="button" class="prompt-chip" onclick="sendQuickPrompt('Recommend a decaf beverage with calming herbs')">
+              🍵 Calming Decaf
+            </button>
+          </div>
+
+          <!-- Chat Messages Scroll Container -->
+          <div class="chat-messages-container" id="chatMessagesContainer">
+            <div class="chat-message model">
+              <div class="message-bubble">
+                <p>Welcome to <strong>The Artisan Roast &amp; Byte</strong>! ☕ I'm Aura, your AI café companion.</p>
+                <p>Tell me what you're in the mood for, your dietary preferences, or ask for a personalized recommendation for your workday!</p>
+              </div>
+              <span class="message-time">Just now</span>
+            </div>
+          </div>
+
+          <!-- Chat Input Bar -->
+          <form class="chat-input-bar" id="chatForm" onsubmit="handleChatSubmit(event)">
+            <input 
+              type="text" 
+              id="chatInput" 
+              class="chat-text-input" 
+              placeholder="e.g. 'I'd like an iced oat latte and a warm almond croissant'..." 
+              autocomplete="off"
+              required
+            >
+            <button type="submit" class="chat-send-btn" id="chatSendBtn" aria-label="Send message">
+              <span>Send</span>
+              <span class="send-arrow">➔</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Specialty Menu Showcase with Category Filter -->
+        <div class="menu-showcase-card" id="menuShowcaseCard">
+          <div class="menu-tabs-bar" id="menuTabsBar">
+            <button type="button" class="menu-tab active" onclick="filterMenuCategory('All')">All Items</button>
+            <button type="button" class="menu-tab" onclick="filterMenuCategory('Espresso & Lattes')">Espresso &amp; Lattes</button>
+            <button type="button" class="menu-tab" onclick="filterMenuCategory('Cold Brews')">Cold Brews</button>
+            <button type="button" class="menu-tab" onclick="filterMenuCategory('Artisanal Teas')">Artisanal Teas</button>
+            <button type="button" class="menu-tab" onclick="filterMenuCategory('Bakery & Treats')">Bakery</button>
+            <button type="button" class="menu-tab" onclick="filterMenuCategory('Light Bites')">Light Bites</button>
+          </div>
+
+          <!-- Grid of Menu Cards -->
+          <div class="menu-grid" id="menuItemsGrid">
+            <!-- Dynamically populated via app.js -->
+            <div class="skeleton-loading-card"></div>
+            <div class="skeleton-loading-card"></div>
+            <div class="skeleton-loading-card"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 2. BETTER WAITS: Live Order Tracker & Best Time to Visit -->
+    <!-- ======================================================================= -->
+    <section class="app-section" id="waitsSection">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <span class="section-number">02</span>
+          <div>
+            <h3 class="section-title">Better Waits</h3>
+            <p class="section-subtitle">Predictive wait intelligence, live order readiness &amp; optimal visit windows</p>
+          </div>
+        </div>
+        <span class="pill-tag">Cloud SQL &amp; Queue Logic</span>
+      </div>
+
+      <div class="waits-layout">
+        <!-- Live Order Readiness Pipeline -->
+        <div class="readiness-card" id="readinessCard">
+          <div class="card-inner-header">
+            <div>
+              <h4 class="card-title">Live Order Readiness Tracker</h4>
+              <p class="card-subtitle" id="activeOrderSubtitle">No active order placed yet. Order from the menu to track live preparation!</p>
+            </div>
+            <span class="order-code-badge" id="activeOrderBadge">Demo Mode</span>
+          </div>
+
+          <!-- 4-Stage Preparation Stepper -->
+          <div class="stepper-pipeline" id="orderStepper">
+            <div class="stepper-step active" id="step-placed">
+              <div class="step-circle">1</div>
+              <div class="step-info">
+                <span class="step-name">Order Placed</span>
+                <span class="step-time">Ticket received</span>
+              </div>
+            </div>
+            <div class="stepper-line" id="line-1"></div>
+            <div class="stepper-step" id="step-brewing">
+              <div class="step-circle">2</div>
+              <div class="step-info">
+                <span class="step-name">Grinding &amp; Pulling</span>
+                <span class="step-time">Single-origin extract</span>
+              </div>
+            </div>
+            <div class="stepper-line" id="line-2"></div>
+            <div class="stepper-step" id="step-artistry">
+              <div class="step-circle">3</div>
+              <div class="step-info">
+                <span class="step-name">Micro-foam &amp; Craft</span>
+                <span class="step-time">Artisan steaming</span>
+              </div>
+            </div>
+            <div class="stepper-line" id="line-3"></div>
+            <div class="stepper-step" id="step-ready">
+              <div class="step-circle">4</div>
+              <div class="step-info">
+                <span class="step-name">Ready at Counter</span>
+                <span class="step-time">Counter #1</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Countdown Radial & Barista Prep Notes -->
+          <div class="wait-insight-box">
+            <div class="wait-metric">
+              <span class="wait-minutes-big" id="dynamicWaitMinutes">~4</span>
+              <span class="wait-unit">mins remaining</span>
+            </div>
+            <div class="wait-notes-text">
+              <p id="waitNotesDetail">AI estimate accounts for current queue load (2 orders ahead), milk texture time, and heating calibration.</p>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" id="orderProgressBar" style="width: 25%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Best Time to Visit Hourly Density Forecast -->
+        <div class="forecast-card" id="forecastCard">
+          <div class="card-inner-header">
+            <div>
+              <h4 class="card-title">Best Time to Visit</h4>
+              <p class="card-subtitle">AI rush-hour forecasting based on historical &amp; real-time occupancy</p>
+            </div>
+            <span class="rush-pill-indicator" id="rushStatusPill">🟢 Optimal Now</span>
+          </div>
+
+          <!-- Visual Bar Chart of Hourly Café Density -->
+          <div class="hourly-chart" id="hourlyChart">
+            <div class="chart-column">
+              <div class="chart-bar-fill" style="height: 35%;"></div>
+              <span class="chart-label">8 AM</span>
+            </div>
+            <div class="chart-column">
+              <div class="chart-bar-fill rush" style="height: 85%;"></div>
+              <span class="chart-label">9 AM</span>
+            </div>
+            <div class="chart-column">
+              <div class="chart-bar-fill" style="height: 60%;"></div>
+              <span class="chart-label">10 AM</span>
+            </div>
+            <div class="chart-column">
+              <div class="chart-bar-fill" style="height: 45%;"></div>
+              <span class="chart-label">11 AM</span>
+            </div>
+            <div class="chart-column">
+              <div class="chart-bar-fill" style="height: 70%;"></div>
+              <span class="chart-label">12 PM</span>
+            </div>
+            <div class="chart-column">
+              <div class="chart-bar-fill" style="height: 50%;"></div>
+              <span class="chart-label">1 PM</span>
+            </div>
+            <div class="chart-column current">
+              <div class="chart-bar-fill optimal" style="height: 30%;"></div>
+              <span class="chart-label">2 PM ★</span>
+            </div>
+            <div class="chart-column">
+              <div class="chart-bar-fill optimal" style="height: 35%;"></div>
+              <span class="chart-label">3 PM</span>
+            </div>
+            <div class="chart-column">
+              <div class="chart-bar-fill" style="height: 55%;"></div>
+              <span class="chart-label">4 PM</span>
+            </div>
+            <div class="chart-column">
+              <div class="chart-bar-fill" style="height: 40%;"></div>
+              <span class="chart-label">5 PM</span>
+            </div>
+          </div>
+
+          <div class="forecast-footer-tip">
+            <span class="tip-icon">💡</span>
+            <p><strong>Pro-Tip:</strong> The <strong>2:00 PM – 4:00 PM</strong> window has our lowest wait times (&lt; 3 mins) and highest communal table availability with natural afternoon sunlight.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 3. DISCOVERY: Personalized Food & Drink Recommendations -->
+    <!-- ======================================================================= -->
+    <section class="app-section" id="discoverySection">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <span class="section-number">03</span>
+          <div>
+            <h3 class="section-title">Discovery</h3>
+            <p class="section-subtitle">Personalized culinary &amp; beverage pairings tailored to your cognitive mood</p>
+          </div>
+        </div>
+        <span class="pill-tag">Gemini Flavor Sommelier</span>
+      </div>
+
+      <div class="discovery-card" id="discoveryCard">
+        <div class="discovery-form-grid">
+          <!-- Mood Selection -->
+          <div class="form-group">
+            <label for="moodSelect" class="form-label">Current Work Vibe / State of Mind</label>
+            <select id="moodSelect" class="form-select">
+              <option value="Deep Focus">Deep Focus &amp; Coding ⚡</option>
+              <option value="Social Buzz">Social Buzz &amp; Meeting Friends 💬</option>
+              <option value="Calm & Mindful">Calm &amp; Mindful Reflection 🍵</option>
+              <option value="Cozy Comfort">Cozy Comfort &amp; Unwinding 🍂</option>
+            </select>
+          </div>
+
+          <!-- Dietary Preference -->
+          <div class="form-group">
+            <label for="dietarySelect" class="form-label">Dietary Preference</label>
+            <select id="dietarySelect" class="form-select">
+              <option value="None">No Restrictions</option>
+              <option value="Dairy-Free">Dairy-Free (Oat/Almond)</option>
+              <option value="Vegan">100% Vegan</option>
+              <option value="Gluten-Free">Gluten-Sensitive</option>
+            </select>
+          </div>
+
+          <!-- Caffeine Requirement -->
+          <div class="form-group">
+            <label for="caffeineSelect" class="form-label">Caffeine Profile</label>
+            <select id="caffeineSelect" class="form-select">
+              <option value="Balanced">Balanced / Medium Roast</option>
+              <option value="High Caffeine">High Caffeine Boost (Single Origin/Cold Brew)</option>
+              <option value="Low/Decaf">Low Caffeine / Herbal</option>
+            </select>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="form-group button-group">
+            <label class="form-label">&nbsp;</label>
+            <button type="button" class="btn-primary-gradient" id="getDiscoveryBtn" onclick="generateDiscoveryRecommendation()">
+              <span>✨ Ask Gemini Sommelier</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Sensory Pairing Output Container -->
+        <div class="pairing-output-container" id="pairingOutputContainer">
+          <div class="pairing-result-box" id="pairingResultBox">
+            <div class="pairing-cards-duo">
+              <!-- Drink Card -->
+              <div class="sommelier-item-card">
+                <span class="card-badge">Beverage Match</span>
+                <h4 class="sommelier-title" id="recDrinkTitle">Kyoto Slow-Drip Pour Over</h4>
+                <p class="sommelier-desc" id="recDrinkDesc">Delicate cold extraction with floral jasmine notes and vibrant bergamot acidity.</p>
+                <button type="button" class="btn-quick-add" onclick="addRecommendedDrinkToCart()">+ Add Drink to Order</button>
+              </div>
+
+              <!-- Pastry Card -->
+              <div class="sommelier-item-card">
+                <span class="card-badge">Artisan Pairing</span>
+                <h4 class="sommelier-title" id="recPastryTitle">Brown Butter Almond Croissant</h4>
+                <p class="sommelier-desc" id="recPastryDesc">Golden twice-baked viennoiserie with rich frangipane cream.</p>
+                <button type="button" class="btn-quick-add" onclick="addRecommendedPastryToCart()">+ Add Pairing to Order</button>
+              </div>
+            </div>
+
+            <!-- Sensory Rationale & Flavor Chips -->
+            <div class="sensory-notes-box">
+              <h5 class="sensory-heading">Sensory Chemistry &amp; Rationale:</h5>
+              <p class="sensory-text" id="recRationale">
+                High clarity single-origin extraction provides clean cognitive stamina without mid-day jitters, balanced by comforting buttery pastry notes.
+              </p>
+              
+              <div class="flavor-chips-list" id="flavorChipsList">
+                <span class="flavor-chip">🍑 White Peach</span>
+                <span class="flavor-chip">🌸 Jasmine Blossom</span>
+                <span class="flavor-chip">🍊 Bergamot</span>
+              </div>
+
+              <div class="barista-tip-banner" id="baristaTipBanner">
+                <span class="tip-star">★</span>
+                <span id="recBaristaTip"><strong>Barista Pro-Tip:</strong> Sip slowly at room temperature to let the floral origin notes bloom.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 4. CONNECT PEOPLE: The Café Commons & AI Icebreakers -->
+    <!-- ======================================================================= -->
+    <section class="app-section" id="socialSection">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <span class="section-number">04</span>
+          <div>
+            <h3 class="section-title">Connect People</h3>
+            <p class="section-subtitle">Discover shared interests, explore the communal table &amp; spark conversations</p>
+          </div>
+        </div>
+        <button type="button" class="btn-secondary-outline" onclick="openJoinLoungeModal()">
+          <span>+ Join Communal Lounge</span>
+        </button>
+      </div>
+
+      <div class="social-lounge-container">
+        <!-- Explanatory Header -->
+        <div class="commons-intro-banner">
+          <div class="intro-text">
+            <h4>Welcome to The Café Commons ☕🤝</h4>
+            <p>
+              Cafés are vibrant third places to meet, share ideas, and unwind. 
+              These fellow guests are currently co-working in the room and open to conversation.
+              Click <strong>"Spark AI Icebreaker"</strong> to generate a tailored, zero-awkwardness opening line!
+            </p>
+          </div>
+        </div>
+
+        <!-- Patrons Cards Grid -->
+        <div class="patrons-grid" id="patronsGrid">
+          <!-- Dynamically populated via app.js -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================= -->
+    <!-- 5. UNDERSTAND THE ROOM: Live Ambient Feedback -->
+    <!-- ======================================================================= -->
+    <section class="app-section" id="feedbackSection">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <span class="section-number">05</span>
+          <div>
+            <h3 class="section-title">Understand the Room</h3>
+            <p class="section-subtitle">Share live table sentiment &amp; ambient conditions to help the café team respond</p>
+          </div>
+        </div>
+        <span class="pill-tag">Live Floor Telemetry</span>
+      </div>
+
+      <div class="feedback-card" id="feedbackCard">
+        <form id="tableFeedbackForm" onsubmit="handleFeedbackSubmit(event)">
+          <div class="feedback-grid">
+            <!-- Table Number -->
+            <div class="form-group">
+              <label for="fbTableNum" class="form-label">Your Table Location</label>
+              <input type="text" id="fbTableNum" class="form-input" placeholder="e.g. Table 4 (Window Bar)" required>
+            </div>
+
+            <!-- Sentiment Score -->
+            <div class="form-group">
+              <label class="form-label">Overall Experience Rating</label>
+              <div class="star-rating-selector" id="starRatingSelector">
+                <button type="button" class="star-btn active" data-score="1" onclick="setStarRating(1)">★</button>
+                <button type="button" class="star-btn active" data-score="2" onclick="setStarRating(2)">★</button>
+                <button type="button" class="star-btn active" data-score="3" onclick="setStarRating(3)">★</button>
+                <button type="button" class="star-btn active" data-score="4" onclick="setStarRating(4)">★</button>
+                <button type="button" class="star-btn active" data-score="5" onclick="setStarRating(5)">★</button>
+              </div>
+              <input type="hidden" id="fbSentimentScore" value="5">
+            </div>
+
+            <!-- Acoustics / Noise -->
+            <div class="form-group">
+              <label for="fbNoise" class="form-label">Acoustics &amp; Music Level</label>
+              <select id="fbNoise" class="form-select">
+                <option value="Ideal Buzz">Ideal Buzz (Balanced)</option>
+                <option value="Quiet Sanctuary">Very Quiet</option>
+                <option value="Loud / Energetic">A bit loud</option>
+              </select>
+            </div>
+
+            <!-- Temperature -->
+            <div class="form-group">
+              <label for="fbTemp" class="form-label">Room Temperature</label>
+              <select id="fbTemp" class="form-select">
+                <option value="Just Right">Just Right</option>
+                <option value="Too Chilly">A bit cold</option>
+                <option value="Warm">Slightly warm</option>
+              </select>
+            </div>
+
+            <!-- Vibe Tag -->
+            <div class="form-group full-width">
+              <label for="fbVibe" class="form-label">Room Vibe Tag</label>
+              <select id="fbVibe" class="form-select">
+                <option value="Focus Friendly">Focus Friendly 💻</option>
+                <option value="Cozy Sanctuary">Cozy Sanctuary 🌿</option>
+                <option value="Social & Lively">Social &amp; Lively 💬</option>
+                <option value="Needs Attention">Staff Attention Needed ⚠️</option>
+              </select>
+            </div>
+
+            <!-- Note / Comment -->
+            <div class="form-group full-width">
+              <label for="fbComment" class="form-label">Quick Note for Baristas &amp; Floor Team (Optional)</label>
+              <input type="text" id="fbComment" class="form-input" placeholder="e.g. 'Playlist is fantastic', 'Water carafe needs refill', etc.">
+            </div>
+          </div>
+
+          <div class="feedback-submit-row">
+            <button type="submit" class="btn-primary-gradient" id="submitFeedbackBtn">
+              <span>Send Live Table Pulse</span>
+            </button>
+            <span class="feedback-toast-msg" id="feedbackToastMsg"></span>
+          </div>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- BARISTA & CAFÉ TEAM FLOOR VIEW (Understand the Room & Smart Kitchen Stream) -->
+  <!-- ========================================================================= -->
+  <main class="main-content" id="baristaView" style="display: none;">
+    
+    <div class="barista-view-header">
+      <div>
+        <h2 class="barista-title">Barista Floor &amp; Kitchen Operations</h2>
+        <p class="barista-subtitle">Real-time room sentiment analytics, AI floor directives, and live order preparation queue</p>
+      </div>
+      <div class="barista-quick-actions">
+        <button type="button" class="btn-refresh" onclick="refreshBaristaDashboard()">↻ Live Sync</button>
+      </div>
+    </div>
+
+    <!-- Top Grid: Room Pulse & Gemini Floor Directives -->
+    <div class="barista-metrics-grid">
+      <!-- Live Sentiment Matrix Card -->
+      <div class="barista-metric-card" id="sentimentMatrixCard">
+        <div class="card-inner-header">
+          <h4 class="card-title">Live Room Pulse &amp; Satisfaction</h4>
+          <span class="badge-status-online">Continuous</span>
+        </div>
+
+        <div class="sentiment-gauge-wrapper">
+          <div class="gauge-dial">
+            <span class="gauge-percentage" id="baristaSentimentPct">92%</span>
+            <span class="gauge-sub">Vibe Happiness</span>
+          </div>
+          <div class="gauge-details">
+            <div class="vibe-pill-large" id="baristaVibeLabel">Deep Work &amp; Creative Harmony</div>
+            <p class="average-stars" id="baristaAvgRating">Average Rating: ★ 4.8 / 5.0</p>
+          </div>
+        </div>
+
+        <div class="ai-executive-summary">
+          <div class="summary-label">
+            <span>✨ Gemini Room Synthesis:</span>
+          </div>
+          <p class="summary-body" id="baristaPulseSummary">
+            The room is radiating a cozy and focused atmosphere. Acoustics and lighting are well-balanced; orders are flowing smoothly through the brew queue.
+          </p>
+        </div>
+      </div>
+
+      <!-- Actionable Directives for Café Staff -->
+      <div class="barista-metric-card" id="staffDirectivesCard">
+        <div class="card-inner-header">
+          <h4 class="card-title">AI Suggested Floor Actions</h4>
+          <span class="pill-tag">Floor Optimization</span>
+        </div>
+
+        <ul class="directives-list" id="baristaDirectivesList">
+          <li class="directive-item">
+            <span class="directive-check">✓</span>
+            <span>Maintain current chill playlist tempo (lo-fi acoustic jazz)</span>
+          </li>
+          <li class="directive-item">
+            <span class="directive-check">✓</span>
+            <span>Verify oat milk stock on steam wand station 2</span>
+          </li>
+          <li class="directive-item">
+            <span class="directive-check">✓</span>
+            <span>Offer table water top-ups to patrons working over 1 hour</span>
+          </li>
+        </ul>
+
+        <div class="staff-quick-controls">
+          <button type="button" class="staff-control-btn" onclick="triggerStaffAction('Playlist softened to 45dB')">🎵 Soften Music</button>
+          <button type="button" class="staff-control-btn" onclick="triggerStaffAction('AC calibrated to 22°C')">❄️ Adjust AC</button>
+          <button type="button" class="staff-control-btn" onclick="triggerStaffAction('Water station restocked')">💧 Restock Water</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kitchen Order Preparation Queue -->
+    <div class="barista-orders-section">
+      <div class="section-header">
+        <div class="section-title-wrapper">
+          <h3 class="section-title">Live Kitchen Preparation Queue</h3>
+          <p class="section-subtitle">Real-time status transitions (Placed ➔ Brewing ➔ Ready ➔ Served)</p>
+        </div>
+        <div class="queue-counter-tag">
+          <span id="kitchenQueueCount">0</span> orders active
+        </div>
+      </div>
+
+      <div class="kitchen-orders-grid" id="kitchenOrdersGrid">
+        <!-- Dynamically rendered order tickets via barista.js -->
+        <div class="empty-queue-msg">Loading active kitchen tickets...</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- SLIDE-OUT CART & CHECKOUT DRAWER -->
+  <!-- ========================================================================= -->
+  <aside class="cart-drawer-overlay" id="cartOverlay" onclick="closeCartDrawer(event)">
+    <div class="cart-drawer" id="cartDrawer" onclick="event.stopPropagation()">
+      <div class="cart-drawer-header">
+        <div class="cart-header-title">
+          <span class="cart-icon-large">🛒</span>
+          <div>
+            <h3>Your Café Order</h3>
+            <p>The Artisan Roast &amp; Byte</p>
+          </div>
+        </div>
+        <button type="button" class="cart-close-btn" onclick="toggleCartDrawer()">✕</button>
+      </div>
+
+      <!-- Order Items List -->
+      <div class="cart-items-list" id="cartItemsList">
+        <div class="empty-cart-state" id="emptyCartState">
+          <span class="empty-cart-icon">☕</span>
+          <p>Your order is currently empty.</p>
+          <p class="empty-sub">Ask Aura in chat or browse the menu to add delicious items!</p>
+        </div>
+      </div>
+
+      <!-- Customer Details Form -->
+      <div class="cart-customer-section">
+        <div class="cart-input-row">
+          <div class="cart-input-field">
+            <label for="cartCustomerName">Your Name</label>
+            <input type="text" id="cartCustomerName" placeholder="e.g. Alex Rivera" required>
+          </div>
+          <div class="cart-input-field">
+            <label for="cartTableNumber">Table #</label>
+            <input type="text" id="cartTableNumber" placeholder="e.g. Table 4" required>
+          </div>
+        </div>
+        <div class="cart-input-field">
+          <label for="cartSpecialNotes">Special Instructions / Roasting Notes</label>
+          <input type="text" id="cartSpecialNotes" placeholder="e.g. Oat milk, extra hot, no cinnamon">
+        </div>
+      </div>
+
+      <!-- Cart Summary & Checkout -->
+      <div class="cart-drawer-footer">
+        <div class="cart-totals-row">
+          <span>Estimated Dynamic Wait:</span>
+          <strong id="cartWaitEstimate">~4 mins</strong>
+        </div>
+        <div class="cart-totals-row total">
+          <span>Total:</span>
+          <strong id="cartTotalPrice">$0.00</strong>
+        </div>
+        <button type="button" class="btn-checkout-primary" id="btnPlaceOrder" onclick="submitCartOrder()">
+          <span>Place Order with Live Tracking</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: JOIN COMMUNAL LOUNGE -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" id="joinLoungeModal" onclick="closeJoinLoungeModal(event)">
+    <div class="modal-window" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <h3>Join The Café Commons</h3>
+          <p>Share your focus project to connect with fellow creators in the room</p>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeJoinLoungeModal()">✕</button>
+      </div>
+      <form id="joinLoungeForm" onsubmit="handleJoinLoungeSubmit(event)">
+        <div class="modal-body-form">
+          <div class="form-group">
+            <label for="patronNameInput" class="form-label">Your Name or Handle</label>
+            <input type="text" id="patronNameInput" class="form-input" placeholder="e.g. Maya Lin" required>
+          </div>
+          <div class="form-group">
+            <label for="patronTableInput" class="form-label">Your Table Location</label>
+            <input type="text" id="patronTableInput" class="form-input" placeholder="e.g. Table 6 (Corner Booth)" required>
+          </div>
+          <div class="form-group">
+            <label for="patronTopicInput" class="form-label">What are you working on / reading right now?</label>
+            <textarea id="patronTopicInput" class="form-textarea" rows="2" placeholder="e.g. Prototyping an ambient AI app, or reading speculative fiction..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="patronOpenForSelect" class="form-label">Open for:</label>
+            <select id="patronOpenForSelect" class="form-select">
+              <option value="Casual Chat & Coffee Break">Casual Chat &amp; Coffee Break ☕</option>
+              <option value="Silent Co-working Buddy">Silent Co-working Buddy 💻</option>
+              <option value="Brainstorming & Tech Talk">Brainstorming &amp; Tech Talk 🚀</option>
+              <option value="Book & Creative Discussion">Book &amp; Creative Discussion 📚</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="patronSkillsInput" class="form-label">Skills &amp; Interests (comma-separated)</label>
+            <input type="text" id="patronSkillsInput" class="form-input" placeholder="e.g. Python, GCP, Product Design, Aeropress">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary-outline" onclick="closeJoinLoungeModal()">Cancel</button>
+          <button type="submit" class="btn-primary-gradient">Add My Table Card</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: AI ICEBREAKER SPARK -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" id="icebreakerModal" onclick="closeIcebreakerModal(event)">
+    <div class="modal-window icebreaker-window" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="sparkle-tag">✨ Gemini Social Matchmaker</span>
+          <h3>AI Conversational Icebreaker</h3>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeIcebreakerModal()">✕</button>
+      </div>
+
+      <div class="icebreaker-modal-body" id="icebreakerModalBody">
+        <div class="icebreaker-loading" id="icebreakerLoading">
+          <span class="loading-spinner"></span>
+          <p>Gemini is finding common threads and crafting a tailored, friendly icebreaker...</p>
+        </div>
+
+        <div class="icebreaker-content" id="icebreakerContent" style="display: none;">
+          <div class="icebreaker-shared-box">
+            <span class="box-label">🤝 Common Thread:</span>
+            <p id="icebreakerSharedThread"></p>
+          </div>
+
+          <div class="icebreaker-prompt-card">
+            <span class="box-label">💬 Natural Conversation Starter:</span>
+            <blockquote id="icebreakerPromptQuote"></blockquote>
+          </div>
+
+          <div class="icebreaker-activity-card">
+            <span class="activity-label">Suggested Low-Pressure Activity:</span>
+            <strong id="icebreakerActivityText"></strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-primary-gradient" onclick="closeIcebreakerModal()">Got it! Say Hello 👋</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: GOOGLE CLOUD ARCHITECTURE & LIVE GEMINI API KEY CONFIG -->
+  <!-- ========================================================================= -->
+  <div class="modal-backdrop" id="cloudModal" onclick="closeCloudModal(event)">
+    <div class="modal-window cloud-tech-window" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <div class="gcp-badge-inline">
+            <span class="gcp-pill">Google Cloud</span>
+            <span class="challenge-pill">Builder Pop-Up Architecture</span>
+          </div>
+          <h3>Google Cloud Technology Foundation</h3>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeCloudModal()">✕</button>
+      </div>
+
+      <div class="cloud-tech-body">
+        <!-- 3 Pillars Grid -->
+        <div class="tech-pillars-grid">
+          <!-- Pillar 1: Gemini APIs -->
+          <div class="pillar-card active">
+            <div class="pillar-icon">✨</div>
+            <h4>1. Gemini APIs</h4>
+            <p class="pillar-tech"><code>google-genai</code> SDK • Gemini 2.5/1.5 Flash</p>
+            <ul class="pillar-features">
+              <li>Conversational ordering agent &amp; cart parsing</li>
+              <li>Sensory mood &amp; flavor pairing sommelier</li>
+              <li>Communal co-working social icebreakers</li>
+              <li>Ambient room sentiment synthesis</li>
+            </ul>
+          </div>
+
+          <!-- Pillar 2: Cloud SQL -->
+          <div class="pillar-card active">
+            <div class="pillar-icon">🗄️</div>
+            <h4>2. Cloud SQL</h4>
+            <p class="pillar-tech">SQLAlchemy ORM • PostgreSQL / SQLite</p>
+            <ul class="pillar-features">
+              <li>Menu catalog schema with dietary metadata</li>
+              <li>Order state machine (placed, brewing, ready)</li>
+              <li>Communal patron cards &amp; privacy controls</li>
+              <li>Ambient acoustic and temperature logs</li>
+            </ul>
+          </div>
+
+          <!-- Pillar 3: Cloud Run -->
+          <div class="pillar-card active">
+            <div class="pillar-icon">🚀</div>
+            <h4>3. Cloud Run</h4>
+            <p class="pillar-tech">Stateless Docker Container • Auto-scaling</p>
+            <ul class="pillar-features">
+              <li>Zero-server management deployment</li>
+              <li>FastAPI ASGI server running on port 8080/8000</li>
+              <li><code>Dockerfile</code> and <code>cloudbuild.yaml</code> ready</li>
+              <li>Auto-scaling down to 0 for cost efficiency</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Live Gemini API Key Configuration Section -->
+        <div class="gemini-key-config-box">
+          <div class="config-header">
+            <h4>Live Gemini API Key Configuration</h4>
+            <span class="status-indicator-live" id="keyConfigStatus">Active</span>
+          </div>
+          <p class="config-desc">
+            The application includes an intelligent simulation engine so it operates out-of-the-box. 
+            You can also input your Google AI Studio / Gemini API key below to enable direct live generation!
+          </p>
+          <div class="key-input-row">
+            <input 
+              type="password" 
+              id="geminiKeyInput" 
+              class="form-input" 
+              placeholder="Paste AI Studio API key (AIzaSy...)"
+            >
+            <button type="button" class="btn-primary-gradient" onclick="saveGeminiApiKey()">
+              <span>Save &amp; Activate</span>
+            </button>
+          </div>
+          <span class="key-feedback-msg" id="keyFeedbackMsg"></span>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-secondary-outline" onclick="closeCloudModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <strong>The Café Companion</strong> — Designed for the Google Cloud Builder Pop-Up Challenge.
+      </div>
+      <div class="footer-right">
+        <span>Technologies: Cloud Run • Cloud SQL • Gemini APIs</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JavaScript Modules -->
+  <script src="/static/js/app.js"></script>
+  <script src="/static/js/barista.js"></script>
+  <script src="/static/js/gemini_chat.js"></script>
+</body>
+</html>
