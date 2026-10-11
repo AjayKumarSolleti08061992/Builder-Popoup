@@ -2,6 +2,9 @@
 > **Google Cloud Builder Pop-Up Challenge**  
 > *Design a smarter café experience powered by AI.*
 
+🌐 **Live Deployment Link**: [https://aerial-verified-spatial-reliability.trycloudflare.com](https://aerial-verified-spatial-reliability.trycloudflare.com)  
+🐙 **GitHub Repository**: [https://github.com/AjayKumarSolleti08061992/Builder-Popoup](https://github.com/AjayKumarSolleti08061992/Builder-Popoup)
+
 ![Café Companion](/static/images/hero_cafe.jpg)
 
 **The Café Companion** is an intelligent web application designed to elevate the café experience for remote workers, casual guests, and barista teams alike. Cafés are vibrant spaces to work, meet, connect, and unwind. This solution leverages **Google Gemini AI**, **Google Cloud SQL**, and **Google Cloud Run** to make every café visit personal, convenient, and connected.
