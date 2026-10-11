@@ -1,0 +1,73 @@
+name: Deploy The Café Companion to Google Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  test-and-lint:
+    name: Code Quality & Container Build Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Test Application Startup & Health
+        run: |
+          python -c "import main; print('Main app loaded cleanly!')"
+          python -c "from app.database import init_database; init_database(); print('Database initialized!')"
+
+      - name: Build Docker Image
+        run: |
+          docker build -t cafe-companion:test .
+
+  deploy-to-cloud-run:
+    name: Deploy to Google Cloud Run
+    needs: test-and-lint
+    runs-on: ubuntu-latest
+    if: "${{ vars.GCP_PROJECT_ID != '' }}"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker --quiet
+
+      - name: Build and Push Container Image
+        run: |
+          docker build -t gcr.io/${{ vars.GCP_PROJECT_ID }}/cafe-companion:${{ github.sha }} .
+          docker push gcr.io/${{ vars.GCP_PROJECT_ID }}/cafe-companion:${{ github.sha }}
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy cafe-companion \
+            --image gcr.io/${{ vars.GCP_PROJECT_ID }}/cafe-companion:${{ github.sha }} \
+            --region us-central1 \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-env-vars "GEMINI_MODEL=gemini-2.5-flash"
